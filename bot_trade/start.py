@@ -62,3 +62,4 @@ client = Spot(
 # account_info = client.rest_api.get_account()
 # print(account_info)
 
+
