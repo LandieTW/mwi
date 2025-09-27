@@ -21,8 +21,13 @@ Use on CMD
     - Installing pipx (py -m pip install --user pipx)
     - Ensuring pipx's path (On a new terminal: py -m pipx ensurepath)
     - Installing poetry (pipx install poetry)
+
+About future trading
+    - https://www.binance.com/en/support/faq/detail/360039304272
+    - https://developers.binance.com/docs/derivatives/quick-start
 """
 
+from filter import *
 
 from binance_common.configuration import ConfigurationRestAPI
 from binance_sdk_spot.spot import Spot
@@ -56,5 +61,4 @@ client = Spot(
 'testing'
 # account_info = client.rest_api.get_account()
 # print(account_info)
-# ticker_price = client.rest_api.get_symbol_price_ticker(symbol="BTCUSDT")
-# print(ticker_price)
+
