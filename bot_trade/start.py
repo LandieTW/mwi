@@ -34,8 +34,11 @@ About future trading
 from rest_api.config import config_rest_api
 from websocket_api.config import config_websocket_api
 from websocket_streams.config import config_websocket_streams
+
 from rest_api.filter import Filter
 from rest_api.error_handling import error_handler
+
+from websocket_api.agent import call_exchange_info
 
 from binance_sdk_spot.spot import Spot
 
@@ -47,8 +50,9 @@ def main():
         config_ws_api = config_websocket_api,
         config_ws_streams = config_websocket_streams,
         )
-    account_info = client.rest_api.get_account()
-    print(account_info)
+    # account_info = client.rest_api.get_account()
+    # print(account_info)
+    # call_exchange_info(client, "BNBUSDT")
 
 if __name__ == "__main__":
     main()
