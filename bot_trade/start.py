@@ -32,8 +32,6 @@ from filter import Filter
 from certificate_pinning import ssl_context
 
 from binance_common.configuration import ConfigurationRestAPI
-from binance_common.constants import SPOT_REST_API_PROD_URL
-from binance_sdk_spot.rest_api.models import ExchangeInfoResponse, RateLimits
 from binance_sdk_spot.spot import Spot
 
 my_api_key = r'ASAZ6e17Ps3J74RARr1uwCp88LWJiutEzIY4e4GSyt5391IXy5QqoXZ8ruG0jsGn'
