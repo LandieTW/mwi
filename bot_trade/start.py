@@ -31,45 +31,15 @@ About future trading
     - https://developers.binance.com/docs/derivatives/quick-start
 """
 
+from rest_api.config import rest_client
 from rest_api.filter import Filter
-from rest_api.certificate_pinning import ssl_context
 from rest_api.error_handling import error_handler
 
-from binance_common.constants import TimeUnit
-from binance_common.configuration import ConfigurationRestAPI
-from binance_sdk_spot.spot import Spot
 
-my_api_key = r'ASAZ6e17Ps3J74RARr1uwCp88LWJiutEzIY4e4GSyt5391IXy5QqoXZ8ruG0jsGn'
-my_secret_key = r'3pUwRYRoVrbhCcWAlcPAqr3XzYrqlmbjY86WCWmVpmnhdE5HoxlpDAXaNGk3ZSL2'
-
-config_rest_api = ConfigurationRestAPI(
-    api_key=my_api_key,                         # my_api_key
-    api_secret = my_secret_key,                 # my_secret_key
-    base_path = None,
-    timeout = 1000,                             # Request timeout in milliseconds
-    proxy = None,
-    keep_alive = True,                          # Enable Keep-Alive
-    compression = True,                         # Enable response compression
-    retries = 3,                                # Number of retry attempts for failed requests
-    backoff = 1000,                             # Delay (ms) between retries
-    https_agent = ssl_context,                  # Custom HTTPS Agent with certificate pinning  
-    time_unit = TimeUnit.MILLISECOND.value,     # Time unit for time-based responses
-    private_key = None,
-    private_key_passphrase = None,
-    custom_headers = {},                        # Custom REST headers
-    )
-
-client = Spot(
-    config_rest_api = config_rest_api,
-    config_ws_api = None,
-    config_ws_streams = None,
-    )
-
-'testing'
 @error_handler
 def main():
     'main function'
-    account_info = client.rest_api.get_account()
+    account_info = rest_client.rest_api.get_account()
     print(account_info)
 
 if __name__ == "__main__":
