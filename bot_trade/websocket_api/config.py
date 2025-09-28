@@ -5,6 +5,7 @@ from others.api_keys import my_secret_key
 from binance_common.configuration import ConfigurationWebSocketAPI
 from binance_common.constants import SPOT_WS_API_PROD_URL
 from binance_common.constants import WebsocketMode
+from binance_common.constants import TimeUnit
 
 
 config_websocket_api = ConfigurationWebSocketAPI( 
@@ -13,13 +14,13 @@ config_websocket_api = ConfigurationWebSocketAPI(
     private_key = None,
     private_key_passphrase = None,
     stream_url = SPOT_WS_API_PROD_URL,
-    timeout = 5,
-    reconnect_delay = 5,
+    timeout = 5000,
+    reconnect_delay = 5000,
     compression = 0,
     proxy = None,
-    mode = WebsocketMode.SINGLE,
-    pool_size = 2,
-    time_unit = None,
+    mode = WebsocketMode.POOL,
+    pool_size = 3,
+    time_unit = TimeUnit.MILLISECOND.value,
     https_agent = None,
     session_re_logon = True,
     )

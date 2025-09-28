@@ -11,9 +11,7 @@ async def exchange_info(
     try:
         connection = await client.websocket_api.create_connection()
 
-        response = await client.websocket_api.exchange_info(
-            symbol=symbol,
-        )
+        response = await client.websocket_api.exchange_info(symbol=symbol)
 
         rate_limits = response.rate_limits
         for rate in rate_limits:
@@ -27,5 +25,8 @@ async def exchange_info(
         if connection:
             await connection.close_connection(close_session=True)
 
-def call_exchange_info(client):
-    asyncio.run(exchange_info(client))
+def call_exchange_info(
+        client: Spot, 
+        symbol: str
+        ):
+    asyncio.run(exchange_info(client, symbol))
