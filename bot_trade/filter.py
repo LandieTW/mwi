@@ -1,4 +1,4 @@
-
+"""Module for defining various trading filters for symbols on Binance's API."""
 
 class Filter:
     """

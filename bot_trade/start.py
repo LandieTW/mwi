@@ -21,15 +21,19 @@ Use on CMD
     - Installing pipx (py -m pip install --user pipx)
     - Ensuring pipx's path (On a new terminal: py -m pipx ensurepath)
     - Installing poetry (pipx install poetry)
+    - pip install pyopenssl
 
 About future trading
     - https://www.binance.com/en/support/faq/detail/360039304272
     - https://developers.binance.com/docs/derivatives/quick-start
 """
 
-from filter import *
+from filter import Filter
+from certificate_pinning import ssl_context
 
 from binance_common.configuration import ConfigurationRestAPI
+from binance_common.constants import SPOT_REST_API_PROD_URL
+from binance_sdk_spot.rest_api.models import ExchangeInfoResponse, RateLimits
 from binance_sdk_spot.spot import Spot
 
 my_api_key = r'ASAZ6e17Ps3J74RARr1uwCp88LWJiutEzIY4e4GSyt5391IXy5QqoXZ8ruG0jsGn'
@@ -45,7 +49,7 @@ config_rest_api = ConfigurationRestAPI(
     compression = True,                     # Enable response compression
     retries = 3,                            # Number of retry attempts for failed requests
     backoff = 1000,                         # Delay (ms) between retries
-    https_agent = None,
+    https_agent = ssl_context,              # Custom HTTPS Agent with certificate pinning  
     time_unit = None,
     private_key = None,
     private_key_passphrase = None,
@@ -59,7 +63,7 @@ client = Spot(
     )
 
 'testing'
-# account_info = client.rest_api.get_account()
-# print(account_info)
+account_info = client.rest_api.get_account()
+print(account_info)
 
 
