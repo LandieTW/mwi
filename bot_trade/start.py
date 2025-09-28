@@ -31,40 +31,26 @@ About future trading
     - https://developers.binance.com/docs/derivatives/quick-start
 """
 
-from rest_api.config import rest_client
+from rest_api.config import config_rest_api
+from websocket_api.config import config_websocket_api
+from websocket_streams.config import config_websocket_streams
 from rest_api.filter import Filter
 from rest_api.error_handling import error_handler
 
+from binance_sdk_spot.spot import Spot
 
 @error_handler
 def main():
     'main function'
-    account_info = rest_client.rest_api.get_account()
+    client = Spot(
+        config_rest_api = config_rest_api,
+        config_ws_api = config_websocket_api,
+        config_ws_streams = config_websocket_streams,
+        )
+    account_info = client.rest_api.get_account()
     print(account_info)
 
 if __name__ == "__main__":
     main()
 
 
-
-
-from binance_common.configuration import ConfigurationRestAPI
-from binance_common.constants import SPOT_REST_API_PROD_URL
-from binance_sdk_spot.spot import Spot
-from binance_sdk_spot.rest_api.models import ExchangeInfoResponse, RateLimits
-
-logging.basicConfig(level=logging.INFO)
-configuration = ConfigurationRestAPI(api_key="your-api-key", api_secret="your-api-secret", base_path=SPOT_REST_API_PROD_URL)
-
-client = Spot(config_rest_api=configuration)
-
-try:
-    response = client.rest_api.exchange_info(symbol="BNBUSDT")
-
-    rate_limits: List[RateLimits] = response.rate_limits
-    logging.info(f"exchange_info() rate limits: {rate_limits}")
-
-    data: ExchangeInfoResponse = response.data()
-    logging.info(f"exchange_info() response: {data}")
-except Exception as e:
-    logging.error(f"exchange_info() error: {e}")
