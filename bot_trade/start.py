@@ -38,6 +38,7 @@ from websocket_streams.config import config_websocket_streams
 
 from rest_api.filter import Filter
 from rest_api.error_handling import error_handler
+from rest_api import functions
 
 from websocket_api.agent import call_exchange_info
 from websocket_streams.agent import call_agg_trade
@@ -56,13 +57,8 @@ def main():
         config_ws_api = config_websocket_api,
         config_ws_streams = config_websocket_streams,
         )
-    # account_info = client.rest_api.get_account()
-    # print(account_info)
-    # call_exchange_info(client, "BNBUSDT")
-    # call_agg_trade(client, "BNBUSDT")
-
-
-
+    
+    # response = functions.account_comission(client, "BNBUSDT")
 
 
 if __name__ == "__main__":
