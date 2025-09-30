@@ -38,7 +38,9 @@ from websocket_streams.config import config_websocket_streams
 
 from rest_api.filter import Filter
 from rest_api.error_handling import error_handler
-from rest_api import functions
+from rest_api.functions import account
+from rest_api.functions import genneral
+from rest_api.functions import market
 
 from websocket_api.agent import call_exchange_info
 from websocket_streams.agent import call_agg_trade
@@ -58,7 +60,6 @@ def main():
         config_ws_streams = config_websocket_streams,
         )
     
-    # response = functions.account_comission(client, "BNBUSDT")
 
 
 if __name__ == "__main__":
