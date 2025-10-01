@@ -3,30 +3,15 @@ from typing import List
 from typing import Union
 from typing import Optional
 
+from bot_trade.others.functions import get_data
 from collections import defaultdict
 
 from binance_sdk_spot.spot import Spot
-from binance_common.models import ApiResponse
 from binance_sdk_spot.rest_api.models import TickerTradingDayTypeEnum
 from binance_sdk_spot.rest_api.models import TickerWindowSizeEnum
 from binance_sdk_spot.rest_api.models import TickerTypeEnum
 from binance_sdk_spot.rest_api.models import UiKlinesIntervalEnum
 from binance_sdk_spot.rest_api.models import Ticker24hrTypeEnum
-
-
-def get_data(
-        response: ApiResponse
-    ) -> defaultdict:
-    """
-    Description:
-        Return response information
-    """
-    info = defaultdict()
-    info['headers'] = response.headers
-    info['status'] = response.status
-    info['rate_limits'] = response.rate_limits
-    info['data'] = response.data()
-    return info
 
 
 def agg_trades(

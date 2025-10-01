@@ -41,6 +41,7 @@ from rest_api.error_handling import error_handler
 from rest_api.functions import account
 from rest_api.functions import genneral
 from rest_api.functions import market
+from rest_api.functions import trade
 
 from websocket_api.agent import call_exchange_info
 from websocket_streams.agent import call_agg_trade
