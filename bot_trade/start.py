@@ -16,8 +16,8 @@ In Binance
     - You should create your own api_key in API Manager
     - When creating the api_key, remember to get the secret_key
     (that's available to be copied just in the moment of creation of the api_key)
-    - After creating the api_key, you must edit it, inserting your public IP and allowing trading spot
-    (you'll find your public IP in https://whatismyipaddress.com/)
+    - After creating the api_key, you must edit it, inserting your public IP and allowing 
+    trading spot (you'll find your public IP in https://whatismyipaddress.com/)
 
 Use on CMD
     - Installing Binance SDK Spot (pip install binance-sdk-spot)
