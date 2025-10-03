@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from binance_sdk_spot.spot import Spot
 
-from binance_sdk_spot.rest_api.models import ExchangeInfoSymbolStatusEnum
+from binance_sdk_spot.websocket_api.models import ExchangeInfoSymbolStatusEnum
 
 
 async def time(

@@ -9,7 +9,7 @@ from collections import defaultdict
 
 from binance_sdk_spot.spot import Spot
 
-from binance_sdk_spot.rest_api.models import KlinesIntervalEnum, Ticker24hrTypeEnum,\
+from binance_sdk_spot.websocket_api.models import KlinesIntervalEnum, Ticker24hrTypeEnum,\
       TickerTypeEnum, TickerWindowSizeEnum, TickerTradingDayTypeEnum, UiKlinesIntervalEnum
 
 
