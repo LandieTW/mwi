@@ -1,6 +1,5 @@
 
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
 from bot_trade.others.functions import get_data
 from collections import defaultdict

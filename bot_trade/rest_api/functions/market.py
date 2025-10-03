@@ -7,12 +7,8 @@ from bot_trade.others.functions import get_data
 from collections import defaultdict
 
 from binance_sdk_spot.spot import Spot
-from binance_sdk_spot.rest_api.models import TickerTradingDayTypeEnum
-from binance_sdk_spot.rest_api.models import TickerWindowSizeEnum
-from binance_sdk_spot.rest_api.models import TickerTypeEnum
-from binance_sdk_spot.rest_api.models import UiKlinesIntervalEnum
-from binance_sdk_spot.rest_api.models import Ticker24hrTypeEnum
-
+from binance_sdk_spot.rest_api.models import (TickerTradingDayTypeEnum, TickerWindowSizeEnum, 
+    TickerTypeEnum, UiKlinesIntervalEnum, Ticker24hrTypeEnum)
 
 def agg_trades(
         client: Spot,
@@ -198,8 +194,8 @@ def ui_klines(
     ) -> defaultdict:
     """
     Description:
-        Kline/candlestick bars for a symbol. 
-        Klines are uniquely identified by their open time.
+        The request is similar to klines having the same parameters and response.
+        `uiKlines` return modified kline data, optimized for presentation of candlestick charts.
     """
     return get_data(
         client.rest_api.ui_klines(
@@ -222,7 +218,7 @@ def ticker(
     ) -> defaultdict:
     """
     Description:
-        24 hour price change statistics for a symbol or symbols.
+        Rolling window price change statistics.
     """
     return get_data(
         client.rest_api.ticker(
@@ -242,6 +238,7 @@ def ticker24hr(
     ) -> defaultdict:
     """
     Description:
+        24hr ticker price change statistics
         24 hour rolling window price change statistics. 
         **Careful** when accessing this with no symbol.
     """

@@ -1,19 +1,28 @@
 
+from typing import Optional
 import asyncio
 from binance_sdk_spot.spot import Spot
+from bot_trade.others.functions import get_data
 
 async def agg_trade(
         client: Spot, 
-        symbol: str
+        symbol: str,
+        id: Optional[str] = None,
         ):
+    """
+    Description:
+        WebSocket Aggregate Trade Streams
+        The Aggregate Trade Streams push trade information that is aggregated for a 
+        single taker order.
+    """
     connection = None
     try:
         connection = await client.websocket_streams.create_connection()
-
-        stream = await connection.agg_trade(symbol=symbol)
-        stream.on("message", lambda data: print(f"{data}"))
-        await asyncio.sleep(5)
-        await stream.unsubscribe()
+        stream = await connection.agg_trade(
+            symbol=symbol,
+            id=id
+            )
+        return get_data(stream)
 
     except Exception as e:
         print(f"exchange_info() error: {e}")
@@ -24,5 +33,10 @@ async def agg_trade(
 def call_agg_trade(
         client: Spot, 
         symbol: str,
+        id: Optional[str] = None,
         ):
-    asyncio.run(agg_trade(client, symbol))
+    asyncio.run(agg_trade(
+        client=client, 
+        symbol=symbol,
+        id=id
+        ))

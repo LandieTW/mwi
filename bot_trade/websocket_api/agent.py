@@ -1,13 +1,8 @@
 
-from typing import Optional
-from typing import List
-
+from typing import Optional, List
 from collections import defaultdict
-
 from bot_trade.others.functions import get_data
-
 import asyncio
-
 from binance_sdk_spot.websocket_api.models import ExchangeInfoSymbolStatusEnum
 from binance_sdk_spot.spot import Spot
 
@@ -20,6 +15,10 @@ async def exchange_info(
         show_permission_sets: Optional[bool] = None,
         symbol_status: Optional[ExchangeInfoSymbolStatusEnum] = None,
         ) -> defaultdict:
+    """
+    Description:
+        Query current exchange trading rules, rate limits, and symbol information.
+    """
     connection = None
     try:
         connection = await client.websocket_api.create_connection()

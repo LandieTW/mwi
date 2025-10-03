@@ -36,8 +36,7 @@ from rest_api.config import config_rest_api
 from websocket_api.config import config_websocket_api
 from websocket_streams.config import config_websocket_streams
 
-from rest_api.filter import Filter
-from rest_api.error_handling import error_handler
+from rest_api import error_handling, filter
 
 from rest_api.functions import account, genneral, market, trade, user_data_stream
 from websocket_api.functions import account, auth, general, market, trade, user_data_stream
@@ -49,7 +48,7 @@ from websocket_streams.agent import call_agg_trade
 from binance_sdk_spot.spot import Spot
 
 
-@error_handler
+@error_handling.error_handler
 def main():
     """
     Description:

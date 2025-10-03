@@ -1,10 +1,7 @@
 
-from typing import Union
-from typing import Optional
-
+from typing import Union, Optional
 from bot_trade.others.functions import get_data
 from collections import defaultdict
-
 from binance_sdk_spot.spot import Spot
 
 
@@ -34,12 +31,15 @@ def all_order_list(
     """
     Description:
         Retrieves all order lists based on provided optional parameters.
+        Note that the time between `startTime` and `endTime` can't be longer than 24 hours.
     """
     return get_data(
         client.rest_api.all_order_list(
             from_id = from_id,
             start_time = start_time,
-            end_time = end_time, limit = limit, recv_window = recv_window,
+            end_time = end_time, 
+            limit = limit, 
+            recv_window = recv_window,
         )
     )
 
@@ -183,6 +183,16 @@ def my_prevented_matches(
     """
     Description:
         Displays the list of orders that were expired due to STP.
+        These are the combinations supported:
+        * `symbol` + `preventedMatchId`
+        * `symbol` + `orderId`
+        * `symbol` + `orderId` + `fromPreventedMatchId` (`limit` will default to 500)
+        * `symbol` + `orderId` + `fromPreventedMatchId` + `limit`
+        Weight: Case                            | Weight
+        ----                            | -----
+        If `symbol` is invalid          | 2
+        Querying by `preventedMatchId`  | 2
+        Querying by `orderId`           | 20
     """
     return get_data(
         client.rest_api.my_prevented_matches(
