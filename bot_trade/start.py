@@ -40,7 +40,7 @@ from rest_api.filter import Filter
 from rest_api.error_handling import error_handler
 
 from rest_api.functions import account, genneral, market, trade, user_data_stream
-from websocket_api.functions import account
+from websocket_api.functions import account, auth, general
 
 from websocket_api.agent import call_exchange_info
 from websocket_streams.agent import call_agg_trade
