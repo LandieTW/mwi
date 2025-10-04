@@ -52,7 +52,7 @@ from binance_sdk_spot.spot import Spot
 def main():
     """
     Description:
-
+        
     """
     client = Spot(
         config_rest_api = config_rest_api,

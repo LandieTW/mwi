@@ -1,10 +1,7 @@
 
 from typing import Union
-
 from bot_trade.others.functions import get_data
-
 from collections import defaultdict
-
 from binance_sdk_spot.spot import Spot
 
 
@@ -42,6 +39,7 @@ def delete_user_data_stream(
     ) -> defaultdict:
     """
     Description:
+         Close out a user data stream.
     """
     return get_data(
         client.rest_api.delete_user_data_stream(

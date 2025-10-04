@@ -1,46 +1,39 @@
 
-from typing import Union
-from typing import Optional
-
+from typing import Union, Optional
 from bot_trade.others.functions import get_data
-
 from collections import defaultdict
-
 from binance_sdk_spot.spot import Spot
-from binance_sdk_spot.rest_api.models import \
-    OrderTestSideEnum, OrderListOtocoWorkingTypeEnum , OrderListOtocoWorkingSideEnum,\
-    OrderListOtocoPendingSideEnum, OrderListOtocoPendingAboveTypeEnum,\
-    OrderListOtoWorkingTypeEnum, OrderTestTypeEnum, OrderTestTimeInForceEnum,\
-    OrderTestNewOrderRespTypeEnum, OrderTestSelfTradePreventionModeEnum,\
-    OrderTestPegPriceTypeEnum, OrderTestPegOffsetTypeEnum, SorOrderTestSideEnum,\
-    SorOrderTestTypeEnum, SorOrderTestTimeInForceEnum, SorOrderTestNewOrderRespTypeEnum,\
-    SorOrderTestSelfTradePreventionModeEnum, SorOrderSideEnum, SorOrderTypeEnum,\
-    SorOrderTimeInForceEnum, SorOrderNewOrderRespTypeEnum, SorOrderSelfTradePreventionModeEnum,\
-    OrderCancelReplaceSideEnum, OrderCancelReplaceTypeEnum,\
-    OrderCancelReplaceCancelReplaceModeEnum, OrderCancelReplaceTimeInForceEnum,\
-    OrderCancelReplaceNewOrderRespTypeEnum, OrderCancelReplaceSelfTradePreventionModeEnum,\
-    OrderCancelReplaceCancelRestrictionsEnum, OrderCancelReplaceOrderRateLimitExceededModeEnum,\
-    OrderCancelReplacePegPriceTypeEnum, OrderCancelReplacePegOffsetTypeEnum,\
-    OrderListOtoPendingSideEnum, OrderListOtoWorkingSideEnum,\
-    OrderListOtoPendingTypeEnum, NewOrderSideEnum,\
-    NewOrderTypeEnum, OrderListOtocoPendingAbovePegPriceTypeEnum,\
-    OrderListOtocoPendingAbovePegOffsetTypeEnum, OrderListOtocoPendingBelowTypeEnum,\
-    OrderListOtocoPendingBelowTimeInForceEnum, OrderListOtocoPendingBelowPegPriceTypeEnum,\
-    OrderListOtocoPendingBelowPegOffsetTypeEnum, OrderListOtocoNewOrderRespTypeEnum, \
-    OrderListOtocoSelfTradePreventionModeEnum, OrderListOtocoWorkingTimeInForceEnum, \
-    OrderListOtocoWorkingPegPriceTypeEnum, OrderListOtocoWorkingPegOffsetTypeEnum, \
-    OrderListOtocoPendingAboveTimeInForceEnum, OrderListOtoNewOrderRespTypeEnum, \
-    OrderListOtoSelfTradePreventionModeEnum, OrderListOtoWorkingTimeInForceEnum, \
-    OrderListOtoWorkingPegPriceTypeEnum, OrderListOtoWorkingPegOffsetTypeEnum, \
-    OrderListOtoPendingTimeInForceEnum, OrderListOtoPendingPegPriceTypeEnum, \
-    OrderListOtoPendingPegOffsetTypeEnum, NewOrderTimeInForceEnum, \
-    NewOrderNewOrderRespTypeEnum, NewOrderSelfTradePreventionModeEnum,\
-    NewOrderPegPriceTypeEnum, NewOrderPegOffsetTypeEnum, DeleteOrderCancelRestrictionsEnum,\
-    OrderListOcoSideEnum, OrderListOcoAboveTypeEnum, OrderListOcoBelowTypeEnum,\
-    OrderListOcoAbovePegPriceTypeEnum, OrderListOcoAbovePegOffsetTypeEnum,\
-    OrderListOcoBelowTimeInForceEnum, OrderListOcoBelowPegPriceTypeEnum,\
-    OrderListOcoBelowPegOffsetTypeEnum, OrderListOcoNewOrderRespTypeEnum,\
-    OrderListOcoSelfTradePreventionModeEnum
+from binance_sdk_spot.rest_api.models import (OrderTestSideEnum, OrderListOtocoWorkingTypeEnum,
+    OrderListOtocoWorkingSideEnum, OrderListOtocoPendingSideEnum, 
+    OrderListOtocoPendingAboveTypeEnum, OrderListOtoWorkingTypeEnum, OrderTestTypeEnum, 
+    OrderTestTimeInForceEnum, OrderTestNewOrderRespTypeEnum, OrderTestSelfTradePreventionModeEnum,
+    OrderTestPegPriceTypeEnum, OrderTestPegOffsetTypeEnum, SorOrderTestSideEnum,
+    SorOrderTestTypeEnum, SorOrderTestTimeInForceEnum, SorOrderTestNewOrderRespTypeEnum,
+    SorOrderTestSelfTradePreventionModeEnum, SorOrderSideEnum, SorOrderTypeEnum,
+    SorOrderTimeInForceEnum, SorOrderNewOrderRespTypeEnum, SorOrderSelfTradePreventionModeEnum,
+    OrderCancelReplaceSideEnum, OrderCancelReplaceTypeEnum,
+    OrderCancelReplaceCancelReplaceModeEnum, OrderCancelReplaceTimeInForceEnum,
+    OrderCancelReplaceNewOrderRespTypeEnum, OrderCancelReplaceSelfTradePreventionModeEnum,
+    OrderCancelReplaceCancelRestrictionsEnum, OrderCancelReplaceOrderRateLimitExceededModeEnum,
+    OrderCancelReplacePegPriceTypeEnum, OrderCancelReplacePegOffsetTypeEnum,
+    OrderListOtoPendingSideEnum, OrderListOtoWorkingSideEnum, OrderListOtoPendingTypeEnum, 
+    NewOrderSideEnum, NewOrderTypeEnum, OrderListOtocoPendingAbovePegPriceTypeEnum,
+    OrderListOtocoPendingAbovePegOffsetTypeEnum, OrderListOtocoPendingBelowTypeEnum,
+    OrderListOtocoPendingBelowTimeInForceEnum, OrderListOtocoPendingBelowPegPriceTypeEnum,
+    OrderListOtocoPendingBelowPegOffsetTypeEnum, OrderListOtocoNewOrderRespTypeEnum,
+    OrderListOtocoSelfTradePreventionModeEnum, OrderListOtocoWorkingTimeInForceEnum,
+    OrderListOtocoWorkingPegPriceTypeEnum, OrderListOtocoWorkingPegOffsetTypeEnum,
+    OrderListOtocoPendingAboveTimeInForceEnum, OrderListOtoNewOrderRespTypeEnum,
+    OrderListOtoSelfTradePreventionModeEnum, OrderListOtoWorkingTimeInForceEnum,
+    OrderListOtoWorkingPegPriceTypeEnum, OrderListOtoWorkingPegOffsetTypeEnum,
+    OrderListOtoPendingTimeInForceEnum, OrderListOtoPendingPegPriceTypeEnum,
+    OrderListOtoPendingPegOffsetTypeEnum, NewOrderTimeInForceEnum, NewOrderNewOrderRespTypeEnum, 
+    NewOrderSelfTradePreventionModeEnum, NewOrderPegPriceTypeEnum, NewOrderPegOffsetTypeEnum, 
+    DeleteOrderCancelRestrictionsEnum, OrderListOcoSideEnum, OrderListOcoAboveTypeEnum, 
+    OrderListOcoBelowTypeEnum, OrderListOcoAbovePegPriceTypeEnum, 
+    OrderListOcoAbovePegOffsetTypeEnum, OrderListOcoBelowTimeInForceEnum, 
+    OrderListOcoBelowPegPriceTypeEnum, OrderListOcoBelowPegOffsetTypeEnum,
+    OrderListOcoNewOrderRespTypeEnum, OrderListOcoSelfTradePreventionModeEnum)
 
 
 def sor_order(
@@ -61,6 +54,8 @@ def sor_order(
     """
     Description:
         Places an order using smart order routing (SOR).
+        This adds 1 order to the `EXCHANGE_MAX_ORDERS` filter and the `MAX_NUM_ORDERS` filter.
+        Read [SOR FAQ](faqs/sor_faq.md) to learn more.
     """
     return get_data(
         client.rest_api.sor_order(
@@ -157,6 +152,10 @@ def order_cancel_replace(
     """
     Description:
         Cancels an existing order and places a new order on the same symbol.
+        Filters and Order Count are evaluated before the processing of the 
+        cancellation and order placement occurs.
+        A new order that was not attempted (i.e. when `newOrderResult: NOT_ATTEMPTED`), 
+        will still increase the unfilled order count by 1.
     """
     return get_data(
         client.rest_api.order_cancel_replace(
@@ -282,22 +281,26 @@ def order_list_oco(
 ) -> defaultdict:
     """
     Description:
-        Send in an one-cancels-the-other (OCO) pair, where activation of one order immediately 
-        cancels the other.
+        Create a One-Cancels-Other (OCO) order pair.
+        Places two linked orders where one cancels the other upon execution.
+        Used for take profit/stop loss strategies.
 
-        * An OCO has 2 orders called the **above order** and **below order**.
-        * One of the orders must be a `LIMIT_MAKER/TAKE_PROFIT/TAKE_PROFIT_LIMIT` order and 
-        the other must be `STOP_LOSS` or `STOP_LOSS_LIMIT` order.
-        * Price restrictions
-          * If the OCO is on the `SELL` side:
-            * `LIMIT_MAKER/TAKE_PROFIT_LIMIT` `price` > Last Traded Price >  
-            `STOP_LOSS/STOP_LOSS_LIMIT` `stopPrice`
-            * `TAKE_PROFIT stopPrice` > Last Traded Price > `STOP_LOSS/STOP_LOSS_LIMIT stopPrice`
-          * If the OCO is on the `BUY` side:
-            * `LIMIT_MAKER/TAKE_PROFIT_LIMIT price` < Last Traded Price < `stopPrice`
-            * `TAKE_PROFIT stopPrice` < Last Traded Price < `STOP_LOSS/STOP_LOSS_LIMIT stopPrice`
-        * OCOs add **2 orders** to the `EXCHANGE_MAX_ORDERS` filter and the 
-        `MAX_NUM_ORDERS` filter.
+        Parameters:
+        -----------
+        symbol : str
+            Trading pair (e.g., 'BTCUSDT')
+        side : str
+            'BUY' or 'SELL'
+        quantity : float
+            Order quantity
+        above_order_type : str
+            'LIMIT_MAKER', 'TAKE_PROFIT', or 'TAKE_PROFIT_LIMIT'
+        above_price : float
+            Price for above order
+        below_order_type : str
+            'STOP_LOSS' or 'STOP_LOSS_LIMIT'  
+        below_stop_price : float
+            Stop price for below order
     """
     return get_data(
         client.rest_api.order_list_oco(
@@ -389,19 +392,26 @@ def order_list_otoco(
     ) -> defaultdict:
     """
     Description:
-        Place an OTOCO.
-        * An OTOCO (One-Triggers-One-Cancels-the-Other) is an order list comprised of 3 orders.
-        * The first order is called the **working order** and must be `LIMIT` or `LIMIT_MAKER`. 
-        Initially, only the working order goes on the order book.
-        * The behavior of the working order is the same as the [OTO]
-        (#new-order-list---oto-trade).
-        * OTOCO has 2 pending orders (pending above and pending below), forming an OCO pair. 
-        The pending orders are only placed on the order book when the working order gets 
-        **fully filled**.
-        * The rules of the pending above and pending below follow the same rules as the 
-        [Order list OCO](#new-order-list---oco-trade).
-        * OTOCOs add **3 orders** to the `EXCHANGE_MAX_NUM_ORDERS` filter and `MAX_NUM_ORDERS` 
-        filter.
+        A 3-order chain: working order triggers OCO pair upon full execution.
+    
+        Parameters:
+        -----------
+        symbol : str
+            Trading pair (e.g., 'BTCUSDT')
+        side : str
+            'BUY' or 'SELL'
+        quantity : float
+            Order quantity
+        working_price : float
+            Limit price for working order (LIMIT/LIMIT_MAKER)
+        above_order_type : str
+            'LIMIT_MAKER', 'TAKE_PROFIT', or 'TAKE_PROFIT_LIMIT'
+        above_price : float
+            Price for above pending order
+        below_order_type : str
+            'STOP_LOSS' or 'STOP_LOSS_LIMIT'
+        below_stop_price : float
+            Stop price for below pending order
     """
     return get_data(
         client.rest_api.order_list_otoco(
@@ -490,21 +500,23 @@ def order_list_oto(
     ) -> defaultdict:
     """
     Description:
-        Place an OTO.
-        * An OTO (One-Triggers-the-Other) is an order list comprised of 2 orders.
-        * The first order is called the **working order** and must be `LIMIT` or 
-        `LIMIT_MAKER`. Initially, only the working order goes on the order book.
-        * The second order is called the **pending order**. It can be any order type except 
-        for `MARKET` orders using parameter `quoteOrderQty`. The pending order is only placed 
-        on the order book when the working order gets **fully filled**.
-        * If either the working order or the pending order is cancelled individually, the 
-        other order in the order list will also be canceled or expired.
-        * When the order list is placed, if the working order gets **immediately fully 
-        filled**, the placement response will show the working order as `FILLED` but the 
-        pending order will still appear as `PENDING_NEW`. You need to query the status of 
-        the pending order again to see its updated status.
-        * OTOs add **2 orders** to the `EXCHANGE_MAX_NUM_ORDERS` filter and 
-        `MAX_NUM_ORDERS` filter.
+        Create a One-Triggers-the-Other (OTO) order list.
+        A 2-order chain: working order triggers pending order upon full execution.
+        
+        Parameters:
+        -----------
+        symbol : str
+            Trading pair (e.g., 'BTCUSDT')
+        side : str
+            'BUY' or 'SELL'
+        quantity : float
+            Order quantity
+        working_price : float
+            Limit price for working order (LIMIT/LIMIT_MAKER)
+        pending_order_type : str
+            Order type for pending order (any except MARKET with quoteOrderQty)
+        pending_price : float
+            Price for pending order (stopPrice for STOP orders)
     """
     return get_data(
         client.rest_api.order_list_oto(
@@ -555,6 +567,8 @@ def order_amend_keep_priority(
     """
     Description:
         Reduce the quantity of an existing open order.
+        This adds 0 orders to the `EXCHANGE_MAX_ORDERS` filter and the `MAX_NUM_ORDERS` filter.
+        Read [Order Amend Keep Priority FAQ](faqs/order_amend_keep_priority.md) to learn more.
     """
     return get_data(
         client.rest_api.order_amend_keep_priority(
@@ -595,6 +609,7 @@ def new_order(
     """
     Description:
         Send in a new order.
+        This adds 1 order to the `EXCHANGE_MAX_ORDERS` filter and the `MAX_NUM_ORDERS` filter.
     """
     return get_data(
         client.rest_api.new_order(
@@ -679,7 +694,8 @@ def delete_open_orders(
     ) -> defaultdict:
     """
     Description:
-        Cancel all active orders on a symbol.
+        Cancels all active orders on a symbol.
+        This includes orders that are part of an order list.
     """
     return get_data(
         client.rest_api.delete_open_orders(
