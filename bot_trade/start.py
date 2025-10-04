@@ -2,9 +2,58 @@
 Descritpion:
     - This is a sample code to start trading with Binance Spot API using the binance-sdk-spot package.
     - Python connector - https://github.com/binance/binance-connector-python
-    - Use rest_api to get static data
-    - Use websocket_api to trade in real time
-    - Use websocket_streams to get real time data
+    
+    ---------------------------------------------
+    ------------- REST API ----------------------
+    ---------------------------------------------
+
+    Characteristics:
+        Synchronous communication (request-response)
+        HTTP/HTTPS protocol
+        Stateless - each request is independent
+        Ideal for specific operations
+
+    Use cases:
+        Get account information
+        Place orders (buy/sell)
+        Check balances
+        Retrieve historical data
+
+    ---------------------------------------------
+    ------------- WEBSOCKET API -----------------
+    ---------------------------------------------
+    
+    Characteristics:
+        Asynchronous and bidirectional communication
+        Persistent connection
+        Stateful - maintains connection state
+        Ideal for receiving real-time data
+
+    Use cases:
+        Receive ticker updates
+        Monitor market depth (order book)
+        Receive real-time trade data
+
+    ---------------------------------------------
+    ------------- WEBSOCKET STREAM --------------
+    ---------------------------------------------
+    
+    Characteristics:
+        Subset of WebSocket API
+        Focused only on receiving data (streaming)
+        Doesn't send commands to the server
+        Optimized for continuous data flow
+
+    --------------------------------------------------------------------------------
+    ---------------- REST API x WEBSOCKET API x WEBSOCKET STREAM -------------------
+    --------------------------------------------------------------------------------
+    Characteristic	    REST API	        WebSocket API	    WebSocket Stream
+    Direction	        Client → Server	    Bidirectional	    Server → Client
+    Connection	        Temporary	        Persistent	        Persistent
+    Latency	            High	            Low	                Very Low
+    Usage	            Actions	            Commands + Data	    Data Only
+    Complexity	        Low	                High	            Medium
+
     
 Necessary
     - Python (version 3.9 or later)
@@ -25,25 +74,20 @@ Use on CMD
     - Ensuring pipx's path (On a new terminal: py -m pipx ensurepath)
     - Installing poetry (pipx install poetry)
     - pip install pyopenssl
-
-About future trading
-    - https://www.binance.com/en/support/faq/detail/360039304272
-    - https://developers.binance.com/docs/derivatives/quick-start
 """
 
-
-from rest_api.config import config_rest_api
-from websocket_api.config import config_websocket_api
-from websocket_streams.config import config_websocket_streams
+from rest_api.rest_api_config import config_rest_api
+from websocket_api.websocket_api_config import config_websocket_api
+from websocket_streams.websocket_streams_config import config_websocket_streams
 
 from rest_api import error_handling, filter
 
-from rest_api.functions import account, genneral, market, trade, user_data_stream
-from websocket_api.functions import account, auth, general, market, trade, user_data_stream
-from websocket_streams.functions import functions
+from rest_api.functions import (rest_api_account, rest_api_general, rest_api_market, rest_api_trade, rest_api_user_data_stream)
+from websocket_api.functions import (websocket_api_account, auth, websocket_api_general, websocket_api_market, websocket_api_trade, websocket_api_user_data_stream)
+from websocket_streams.functions import (websocket_streams_functions)
 
-from websocket_api.agent import call_exchange_info
-from websocket_streams.agent import call_agg_trade
+from websocket_api.websocket_api_agent import call_exchange_info
+from websocket_streams.websocket_streams_agent import call_agg_trade
 
 from binance_sdk_spot.spot import Spot
 
@@ -52,7 +96,7 @@ from binance_sdk_spot.spot import Spot
 def main():
     """
     Description:
-        
+
     """
     client = Spot(
         config_rest_api = config_rest_api,
@@ -60,7 +104,12 @@ def main():
         config_ws_streams = config_websocket_streams,
         )
     
-
+    result = account.call_account_comission(
+        client=client,
+        symbol="BTCUSDT",
+        id=None
+    )
+    print(result)
 
 if __name__ == "__main__":
     main()

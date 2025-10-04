@@ -1,7 +1,7 @@
 
 from typing import Optional, List
 from collections import defaultdict
-from bot_trade.others.functions import get_data
+from others.other_functions import get_data
 import asyncio
 from binance_sdk_spot.websocket_api.models import ExchangeInfoSymbolStatusEnum
 from binance_sdk_spot.spot import Spot

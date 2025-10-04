@@ -1,15 +1,9 @@
 
 import asyncio
-
-from typing import Optional
-from typing import List
-
-from bot_trade.others.functions import get_data
-
+from typing import Optional, List
+from others.other_functions import get_data
 from collections import defaultdict
-
 from binance_sdk_spot.spot import Spot
-
 from binance_sdk_spot.websocket_api.models import ExchangeInfoSymbolStatusEnum
 
 

@@ -1,11 +1,7 @@
 
-from typing import List
-from typing import Union
-from typing import Optional
-
-from bot_trade.others.functions import get_data
+from typing import List, Union, Optional
+from others.other_functions import get_data
 from collections import defaultdict
-
 from binance_sdk_spot.spot import Spot
 from binance_sdk_spot.rest_api.models import (TickerTradingDayTypeEnum, TickerWindowSizeEnum, 
     TickerTypeEnum, UiKlinesIntervalEnum, Ticker24hrTypeEnum)

@@ -1,6 +1,6 @@
 
 from typing import Union, Optional
-from bot_trade.others.functions import get_data
+from others.other_functions import get_data
 from collections import defaultdict
 from binance_sdk_spot.spot import Spot
 from binance_sdk_spot.rest_api.models import (OrderTestSideEnum, OrderListOtocoWorkingTypeEnum,

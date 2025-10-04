@@ -1,13 +1,8 @@
 
 import asyncio
-
-from typing import Union
-from typing import Optional
-
-from bot_trade.others.functions import get_data
-
+from typing import Union, Optional
+from others.other_functions import get_data
 from collections import defaultdict
-
 from binance_sdk_spot.spot import Spot
 
 

@@ -1,16 +1,11 @@
 
 import asyncio
-
 from typing import Optional, Union, List
-
-from bot_trade.others.functions import get_data
-
+from others.other_functions import get_data
 from collections import defaultdict
-
 from binance_sdk_spot.spot import Spot
-
-from binance_sdk_spot.websocket_api.models import KlinesIntervalEnum, Ticker24hrTypeEnum,\
-      TickerTypeEnum, TickerWindowSizeEnum, TickerTradingDayTypeEnum, UiKlinesIntervalEnum
+from binance_sdk_spot.websocket_api.models import (KlinesIntervalEnum, Ticker24hrTypeEnum,
+      TickerTypeEnum, TickerWindowSizeEnum, TickerTradingDayTypeEnum, UiKlinesIntervalEnum)
 
 
 async def avg_price(
