@@ -76,61 +76,116 @@ Use on CMD
     - pip install pyopenssl
 """
 
+import time
 from rest_api.rest_api_config import config_rest_api
 from websocket_api.websocket_api_config import config_websocket_api
 from websocket_streams.websocket_streams_config import config_websocket_streams
-
 from rest_api import error_handling, filter
-
-from rest_api.functions import (rest_api_account, rest_api_general, rest_api_market, rest_api_trade, rest_api_user_data_stream)
-from websocket_api.functions import (websocket_api_account, auth, websocket_api_general, websocket_api_market, websocket_api_trade, websocket_api_user_data_stream)
+from rest_api.functions import (rest_api_account, rest_api_general, rest_api_market, 
+    rest_api_trade, rest_api_user_data_stream)
+from websocket_api.functions import (websocket_api_account, auth, websocket_api_general, 
+    websocket_api_market, websocket_api_trade, websocket_api_user_data_stream)
 from websocket_streams.functions import (websocket_streams_functions)
-
 from websocket_api.websocket_api_agent import call_exchange_info
 from websocket_streams.websocket_streams_agent import call_agg_trade
-
 from binance_sdk_spot.spot import Spot
-
-import pprint
 
 
 class MyCount:
+
 
     def __init__(
             self,
             client
             ):
-        self.info = rest_api_account.get_account(client=client, omit_zero_balances=True)['data']
+        self.info = rest_api_account.get_account(
+            client=client, 
+            omit_zero_balances=True
+            )['data']
         self.symbol = 'BTCUSDT'
-        self.tax = self.calculate_taxes(client=client)
+        self.end_time = int(time.time() * 1_000)
+        self.start_time = self.end_time - (30 * 24 * 60 * 60 * 1_000)
+        self.tax = self.calculate_taxes(
+            client=client
+            )
+        self.incomes = self.check_my_trades(
+            client=client,
+            )
     
+
     def calculate_taxes(self, client) -> float:
         '''
         Calculate taxes rate for each order
         '''
-        comission_data = rest_api_account.account_comission(client=client, symbol=self.symbol)['data']
+        comission_data = rest_api_account.account_comission(
+            client=client, symbol=self.symbol)['data']
         
         # calculate taxes
-        standard_taxes = eval(comission_data.standard_commission.taker)
-        special_taxes = eval(comission_data.special_commission.taker)
-        comission_taxes = eval(comission_data.tax_commission.taker)
-        taxes = standard_taxes + special_taxes + comission_taxes
+        taxes = eval(comission_data.standard_commission.taker)\
+            + eval(comission_data.special_commission.taker)\
+                + eval(comission_data.tax_commission.taker)
         
         # calculate discount
-        discount = comission_data.discount
-        if discount.enabled_for_account:
-            asset = discount.discount_asset
-            discount_taxes = discount.discount if self.check_coin_in_account(coin=asset) else 0
+        discount_taxes = comission_data.discount.discount \
+            if (self.check_coin_in_account(
+                coin=comission_data.discount.discount_asset
+                ) and comission_data.discount.enabled_for_account
+                ) else 0
         
         return taxes * (1-discount_taxes)
         
-    def check_coin_in_account(self, coin: str) -> bool:
+
+    def check_coin_in_account(
+            self,
+            coin: str
+            ) -> bool:
         '''
         Check if the coin is in account.
         '''
         balances = self.info.balances
-        bnb_balance = next((balance for balance in balances if coin.lower() in balance.asset.lower()), None)
+        bnb_balance = next((balance for balance in balances \
+                            if coin.lower() in balance.asset.lower()), None)
         return True if eval(bnb_balance.free) > .1 else False
+
+
+    def get_order_id(
+            self,
+        ):
+        '''
+        Get order id from XX days ago
+        '''
+        params = {
+            'symbol': self.symbol,
+            'order_id': None,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'limit': 1_000,
+            'recv_window': None
+        }
+        orders_id = rest_api_account.all_orders(**params)['data']
+        print('HERE')
+
+
+    def check_my_trades(
+            self, 
+            client: Spot,
+            ):
+        '''
+        Check my trades data
+        '''
+        params = {
+            'client': client,
+            'symbol': self.symbol,
+            'order_id': None,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'from_id': self.get_order_id(),
+            'limit': None,
+            'recv_window': None
+        }
+        trade_data = rest_api_account.my_trades(**params)['data']
+
+        print('HERE')
 
 
 @error_handling.error_handler
@@ -148,6 +203,8 @@ def main():
     
     my_count = MyCount(client)
 
+    'Utilizar amendments para rastreabilidade de dados enquanto a ordem está aberta'
+    'my trades para avaliar resultados de trading recentes'
 
 if __name__ == "__main__":
     main()
