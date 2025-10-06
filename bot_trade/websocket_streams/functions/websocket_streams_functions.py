@@ -336,8 +336,8 @@ async def partial_book_depth(
     """
     Description:
         WebSocket Partial Book Depth Streams
-        Top **\<levels\>** bids and asks, pushed every second. 
-        Valid **\<levels\>** are 5, 10, or 20.
+        Top **levels** bids and asks, pushed every second. 
+        Valid **levels** are 5, 10, or 20.
     """
     connection = None
     try:
