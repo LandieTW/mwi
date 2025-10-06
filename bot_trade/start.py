@@ -77,7 +77,12 @@ Use on CMD
 """
 
 
+import threading
 import time
+import asyncio
+import logging
+
+from typing import List, Dict
 
 from rest_api.rest_api_config import client_rest
 from websocket_api.websocket_api_config import client_ws_api
@@ -94,18 +99,23 @@ from websocket_streams.functions import (websocket_streams_functions)
 from websocket_api.websocket_api_agent import call_exchange_info
 from websocket_streams.websocket_streams_agent import call_agg_trade
 
+from binance_sdk_spot.websocket_streams.models import KlineIntervalEnum
+
 
 class MyCount:
+
+
     def __init__(self,):
         self.client = client_rest
         self.info = rest_api_account.get_account(client=self.client, omit_zero_balances=True)['data']
         self.symbol = 'BTCUSDT'
         self.end_time = int(time.time() * 1_000)
         self.start_time = self.end_time - (30 * 24 * 60 * 60 * 1_000)
-        self.tax = self.calculate_taxes(client=self.client)
+        self.tax = self.calculate_taxes()
         '''
         self.incomes = self.check_my_trades(client=self.client)
         '''
+
 
     def calculate_taxes(self) -> float:
         '''
@@ -166,6 +176,57 @@ class MyCount:
 
 
 
+class KlineAnalysis:
+
+
+    def __init__(self):
+        self.client = client_ws_streams
+        self.kline_data: List[Dict]
+
+
+    async def get_kline(self):
+        '''
+        Extract kline result
+
+        Campo	        Nome	                        Descrição	                    Exemplo
+        t	            Open Time	                    Timestamp de abertura	        1759720528000
+        T	            Close Time	                    Timestamp de fechamento     	1759720528999
+        i	            Interval	                    Timeframe do kline	            '1s'
+        f	            First Trade ID	                ID do primeiro trade	        5287326925
+        L	            Last Trade ID	                ID do último trade	            5287326934
+        o	            Open Price	                    Preço de abertura	            '124035.43000000'
+        c	            Close Price	                    Preço de fechamento	            '124035.43000000'
+        h	            High Price	                    Preço máximo	                '124035.43000000'
+        l	            Low Price	                    Preço mínimo	                '124035.42000000'
+        v	            Base Asset Volume	            Volume em BTC	                '0.01776000'
+        n	            Number of Trades	            Nº de trades no período	        10
+        x	            Is Kline Closed?	            Se o kline finalizou	        True
+        q	            Quote Asset Volume	            Volume em USDT	                '2202.86923420'
+        V	            Taker Buy Base Volume	        Volume comprador em BTC	        '0.01750000'
+        Q	            Taker Buy Quote Volume	        Volume comprador em USDT	    '2170.62002500'
+        B	            Ignore	                        Campo ignorado	                '0'
+        '''
+        connection = None
+
+        def message_handler(data):
+            """Save retrieved kline data"""
+            print(f"Retrieved data: {data}")
+            self.kline_data.append(data)
+
+        try:
+            connection = await self.client.websocket_streams.create_connection()
+            stream = await connection.kline(symbol="BTCUSDT", interval='1s')
+            stream.on("message", message_handler)
+            
+            await asyncio.sleep(10)
+            await stream.unsubscribe()
+        except Exception as e:
+            logging.error(f"kline() error: {e}")
+        finally:
+            if connection:
+                await connection.close_connection(close_session=True)
+
+
 @error_handling.error_handler
 def main():
     """
@@ -174,10 +235,8 @@ def main():
     """
     my_count = MyCount()
 
-
-
-
-    print('HERE')
+    analysis_kline = KlineAnalysis()
+    asyncio.run(analysis_kline.get_kline())
 
 
 

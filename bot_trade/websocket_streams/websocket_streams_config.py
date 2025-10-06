@@ -1,20 +1,12 @@
 
-from binance_common.configuration import ConfigurationWebSocketStreams
-from binance_common.constants import SPOT_WS_STREAMS_PROD_URL
+import os
 from binance_common.constants import WebsocketMode
 from binance_common.constants import TimeUnit
-from binance_sdk_spot.spot import Spot
+from binance_sdk_spot.spot import Spot, ConfigurationWebSocketStreams, SPOT_WS_STREAMS_PROD_URL
 
 
 config_websocket_streams = ConfigurationWebSocketStreams(
-    reconnect_delay = 5000,
-    compression = 0,
-    proxy = None,
-    mode = WebsocketMode.POOL,
-    pool_size = 3,
-    time_unit = TimeUnit.MILLISECOND.value,
-    https_agent = None,
-    stream_url=SPOT_WS_STREAMS_PROD_URL,
+    stream_url=os.getenv("STREAM_URL", SPOT_WS_STREAMS_PROD_URL),
 )
 
 
