@@ -1,6 +1,7 @@
 """
 Descritpion:
-    - This is a sample code to start trading with Binance Spot API using the binance-sdk-spot package.
+    - This is a sample code to start trading with Binance Spot API using the binance-sdk-spot
+    package.
     - Python connector - https://github.com/binance/binance-connector-python
     
     ---------------------------------------------
@@ -77,7 +78,7 @@ Use on CMD
 """
 
 
-import threading
+import msvcrt
 import time
 import asyncio
 import logging
@@ -177,54 +178,78 @@ class MyCount:
 
 
 class KlineAnalysis:
+    '''
+    Extract kline result
+
+    Campo	    Nome	                    Descrição	                    Exemplo
+    t	        Open Time	                Timestamp de abertura	        1759720528000
+    T	        Close Time	                Timestamp de fechamento     	1759720528999
+    i	        Interval	                Timeframe do kline	            '1s'
+    f	        First Trade ID	            ID do primeiro trade	        5287326925
+    L	        Last Trade ID	            ID do último trade	            5287326934
+    o	        Open Price	                Preço de abertura	            '124035.43000000'
+    c	        Close Price	                Preço de fechamento	            '124035.43000000'
+    h	        High Price	                Preço máximo	                '124035.43000000'
+    l	        Low Price	                Preço mínimo	                '124035.42000000'
+    v	        Base Asset Volume	        Volume em BTC	                '0.01776000'
+    n	        Number of Trades	        Nº de trades no período	        10
+    x	        Is Kline Closed?	        Se o kline finalizou	        True
+    q	        Quote Asset Volume	        Volume em USDT	                '2202.86923420'
+    V	        Taker Buy Base Volume	    Volume comprador em BTC	        '0.01750000'
+    Q	        Taker Buy Quote Volume	    Volume comprador em USDT	    '2170.62002500'
+    B	        Ignore	                    Campo ignorado	                '0'
+    '''
 
 
     def __init__(self):
         self.client = client_ws_streams
-        self.kline_data: List[Dict]
+        self.kline_data = []
+        self.shutdown_event = asyncio.Event()
+
+
+    async def shutdown(self):
+        """Verify if 'Esc' is pressed, than shutdown get_kline"""
+        while True:
+            if msvcrt.kbhit() and msvcrt.getch() == b'\x1b':
+                self.shutdown_event.set()
+                break
+            await asyncio.sleep(0.1)
 
 
     async def get_kline(self):
-        '''
-        Extract kline result
-
-        Campo	        Nome	                        Descrição	                    Exemplo
-        t	            Open Time	                    Timestamp de abertura	        1759720528000
-        T	            Close Time	                    Timestamp de fechamento     	1759720528999
-        i	            Interval	                    Timeframe do kline	            '1s'
-        f	            First Trade ID	                ID do primeiro trade	        5287326925
-        L	            Last Trade ID	                ID do último trade	            5287326934
-        o	            Open Price	                    Preço de abertura	            '124035.43000000'
-        c	            Close Price	                    Preço de fechamento	            '124035.43000000'
-        h	            High Price	                    Preço máximo	                '124035.43000000'
-        l	            Low Price	                    Preço mínimo	                '124035.42000000'
-        v	            Base Asset Volume	            Volume em BTC	                '0.01776000'
-        n	            Number of Trades	            Nº de trades no período	        10
-        x	            Is Kline Closed?	            Se o kline finalizou	        True
-        q	            Quote Asset Volume	            Volume em USDT	                '2202.86923420'
-        V	            Taker Buy Base Volume	        Volume comprador em BTC	        '0.01750000'
-        Q	            Taker Buy Quote Volume	        Volume comprador em USDT	    '2170.62002500'
-        B	            Ignore	                        Campo ignorado	                '0'
-        '''
         connection = None
 
         def message_handler(data):
             """Save retrieved kline data"""
-            print(f"Retrieved data: {data}")
-            self.kline_data.append(data)
+            if not self.shutdown_event.is_set():
+                print(f"Retrieved data: {data}")
+                self.kline_data.append(data)
 
         try:
+
             connection = await self.client.websocket_streams.create_connection()
             stream = await connection.kline(symbol="BTCUSDT", interval='1s')
             stream.on("message", message_handler)
             
-            await asyncio.sleep(10)
+            await self.shutdown_event.wait()
             await stream.unsubscribe()
+
         except Exception as e:
             logging.error(f"kline() error: {e}")
         finally:
             if connection:
                 await connection.close_connection(close_session=True)
+    
+
+    async def gather_routines(self):
+        '''
+        Gather various tasks routines and execute it as in parallel proccess
+        '''
+        await asyncio.gather(
+            self.get_kline(),
+            self.shutdown(),
+            return_exceptions=True
+        )
 
 
 @error_handling.error_handler
@@ -236,7 +261,7 @@ def main():
     my_count = MyCount()
 
     analysis_kline = KlineAnalysis()
-    asyncio.run(analysis_kline.get_kline())
+    asyncio.run(analysis_kline.gather_routines())
 
 
 
