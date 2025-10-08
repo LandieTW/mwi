@@ -3,6 +3,7 @@ Descritpion:
     - This is a sample code to start trading with Binance Spot API using the binance-sdk-spot
     package.
     - Python connector - https://github.com/binance/binance-connector-python
+    - Bynance public data - https://data.binance.vision/
     
     ---------------------------------------------
     ------------- REST API ----------------------
@@ -82,6 +83,7 @@ import msvcrt
 import time
 import asyncio
 import logging
+import pandas as pd
 
 from typing import List, Dict
 
@@ -101,6 +103,18 @@ from websocket_api.websocket_api_agent import call_exchange_info
 from websocket_streams.websocket_streams_agent import call_agg_trade
 
 from binance_sdk_spot.websocket_streams.models import KlineIntervalEnum
+
+# ------------------
+# CONSTANTS --------
+# ------------------
+
+'N° decimal places'
+decimal = 2
+
+
+# -----------------
+# CLASSES ---------
+# -----------------
 
 
 class MyCount:
@@ -176,39 +190,24 @@ class MyCount:
         print('HERE')
 
 
-
 class KlineAnalysis:
     '''
     Extract kline result
-
-    Campo	    Nome	                    Descrição	                    Exemplo
-    t	        Open Time	                Timestamp de abertura	        1759720528000
-    T	        Close Time	                Timestamp de fechamento     	1759720528999
-    i	        Interval	                Timeframe do kline	            '1s'
-    f	        First Trade ID	            ID do primeiro trade	        5287326925
-    L	        Last Trade ID	            ID do último trade	            5287326934
-    o	        Open Price	                Preço de abertura	            '124035.43000000'
-    c	        Close Price	                Preço de fechamento	            '124035.43000000'
-    h	        High Price	                Preço máximo	                '124035.43000000'
-    l	        Low Price	                Preço mínimo	                '124035.42000000'
-    v	        Base Asset Volume	        Volume em BTC	                '0.01776000'
-    n	        Number of Trades	        Nº de trades no período	        10
-    x	        Is Kline Closed?	        Se o kline finalizou	        True
-    q	        Quote Asset Volume	        Volume em USDT	                '2202.86923420'
-    V	        Taker Buy Base Volume	    Volume comprador em BTC	        '0.01750000'
-    Q	        Taker Buy Quote Volume	    Volume comprador em USDT	    '2170.62002500'
-    B	        Ignore	                    Campo ignorado	                '0'
     '''
 
 
     def __init__(self):
         self.client = client_ws_streams
-        self.kline_data = []
+        self.kline_data = {}
         self.shutdown_event = asyncio.Event()
+        self.graph_stats = {}
 
 
     async def shutdown(self):
-        """Verify if 'Esc' is pressed, than shutdown get_kline"""
+        """
+        Description:
+            Verify if 'Esc' is pressed, than shutdown get_kline
+        """
         while True:
             if msvcrt.kbhit() and msvcrt.getch() == b'\x1b':
                 self.shutdown_event.set()
@@ -217,16 +216,57 @@ class KlineAnalysis:
 
 
     async def get_kline(self):
-        connection = None
+        """
+        Description:
+            Get graph data in real time
 
+            Campo	    Nome	                    Descrição	                    Exemplo
+            t	        Open Time	                Timestamp de abertura	        1759720528000
+            T	        Close Time	                Timestamp de fechamento     	1759720528999
+            i	        Interval	                Timeframe do kline	            '1s'
+            f	        First Trade ID	            ID do primeiro trade	        5287326925
+            L	        Last Trade ID	            ID do último trade	            5287326934
+            o	        Open Price	                Preço de abertura	            '124035.43000000'
+            c	        Close Price	                Preço de fechamento	            '124035.43000000'
+            h	        High Price	                Preço máximo	                '124035.43000000'
+            l	        Low Price	                Preço mínimo	                '124035.42000000'
+            v	        Base Asset Volume	        Volume em BTC	                '0.01776000'
+            n	        Number of Trades	        Nº de trades no período	        10
+            x	        Is Kline Closed?	        Se o kline finalizou	        True
+            q	        Quote Asset Volume	        Volume em USDT	                '2202.86923420'
+            V	        Taker Buy Base Volume	    Volume comprador em BTC	        '0.01750000'
+            Q	        Taker Buy Quote Volume	    Volume comprador em USDT	    '2170.62002500'
+            B	        Ignore	                    Campo ignorado	                '0'
+        """
         def message_handler(data):
-            """Save retrieved kline data"""
+            """
+            Description:
+                Save retrieved kline data
+            """
             if not self.shutdown_event.is_set():
-                print(f"Retrieved data: {data}")
-                self.kline_data.append(data)
+                self.kline_data = {
+                        "Open time": int(data.k.t),
+                        "Close time": int(data.k.T),
+                        "Symbol": str(data.k.s),
+                        "Interval": str(data.k.i),
+                        "First trade ID": int(data.k.f),
+                        "Last trade ID": int(data.k.L),
+                        "Open price": round(float(data.k.o), decimal),
+                        "Close price": round(float(data.k.c), decimal),
+                        "High price": round(float(data.k.h), decimal),
+                        "Low price": round(float(data.k.l), decimal),
+                        "Base asset volume": round(float(data.k.v), decimal),
+                        "Number of trades": int(data.k.n),
+                        "Is kline close": bool(data.k.x),
+                        "Quote asset volume": round(float(data.k.q), decimal),
+                        "Taker buy base volume": round(float(data.k.V), decimal),
+                        "Taker buy quote volume": round(float(data.k.Q), decimal),
+                        "Ignore": str(data.k.B)
+                }
+                # print(f"Retrieved data: {self.kline_data}")
 
+        connection = None
         try:
-
             connection = await self.client.websocket_streams.create_connection()
             stream = await connection.kline(symbol="BTCUSDT", interval='1s')
             stream.on("message", message_handler)
@@ -241,6 +281,44 @@ class KlineAnalysis:
                 await connection.close_connection(close_session=True)
     
 
+    async def statistics(self):
+        """
+        Description:
+            Gets last 24h graph statistics
+        """
+        while not self.shutdown_event.is_set():
+            ticker = rest_api_market.ticker24hr(
+                client=client_rest,
+                symbol="BTCUSDT"
+            )['data'].actual_instance
+
+            self.graph_stats = {
+                "Price_change": round(float(ticker.price_change), decimal),
+                "Price_change_percent": round(float(ticker.price_change_percent), decimal),
+                "Weighted_avg_price": round(float(ticker.weighted_avg_price), decimal),
+                "Prev_close_price": round(float(ticker.prev_close_price), decimal),
+                "Last_price": round(float(ticker.last_price), decimal),
+                "Last_qty": round(float(ticker.last_qty), decimal),
+                "Bid_price": round(float(ticker.bid_price), decimal),
+                "Bid_qty": round(float(ticker.bid_qty), decimal),
+                "Ask_price": round(float(ticker.ask_price), decimal),
+                "Ask_qty": round(float(ticker.ask_qty), decimal),
+                "Open_price": round(float(ticker.open_price), decimal),
+                "High_price": round(float(ticker.high_price), decimal),
+                "Low_price": round(float(ticker.low_price), decimal),
+                "Volume": round(float(ticker.volume), decimal),
+                "Quote_volume": round(float(ticker.quote_volume), decimal),
+                "Open_time": int(ticker.open_time),
+                "Close_time": int(ticker.close_time),
+                "First_id": int(ticker.first_id),
+                "Last_id": int(ticker.last_id),
+                "Count": int(ticker.count)
+            }
+
+            # print(f"Stats: {self.graph_stats}")
+            await asyncio.sleep(5)
+
+
     async def gather_routines(self):
         '''
         Gather various tasks routines and execute it as in parallel proccess
@@ -248,6 +326,7 @@ class KlineAnalysis:
         await asyncio.gather(
             self.get_kline(),
             self.shutdown(),
+            self.statistics(),
             return_exceptions=True
         )
 
@@ -258,13 +337,13 @@ def main():
     Description:
 
     """
-    my_count = MyCount()
+    # my_count = MyCount()
 
     analysis_kline = KlineAnalysis()
     asyncio.run(analysis_kline.gather_routines())
 
-
-
+    # 
 
 if __name__ == "__main__":
     main()
+
