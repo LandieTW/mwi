@@ -96,7 +96,7 @@ def main():
     """
 
 
-    analysis_kline = websocket_streams_classes.KlineAnalysis(client=client_ws_streams)
+    analysis_kline = websocket_streams_classes.KlineAnalysis(client_ws_streams, client_rest)
     asyncio.run(analysis_kline.gather_routines())
     
     my_count = rest_api_classes.MyCount(client=client_rest)

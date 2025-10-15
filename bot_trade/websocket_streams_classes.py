@@ -18,8 +18,10 @@ class KlineAnalysis:
     Extract kline result
     '''
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, websocket_streams_client, rest_client):
+        self.client = websocket_streams_client
+        self.rest_client = rest_client
+        self.trigger = None
         self.df_size = 100
         self.export_data = pd.DataFrame()
         self.buffer_size = 5
@@ -75,24 +77,43 @@ class KlineAnalysis:
                         "Ignore": str(data.k.B)
                 }
                 '''
-                
-                candle = {
-                    "open": round(float(data.k.o), decimal),
-                    "close": round(float(data.k.c), decimal),
-                    "high": round(float(data.k.h), decimal),
-                    "low": round(float(data.k.l), decimal),
-                    "volume": round(float(data.k.v), decimal),
-                }
-                self.kline_data.append(candle)
-                print(self.export_data.tail(50))
+                open_candle = int(data.k.t)
 
-                if len(self.kline_data) >= self.buffer_size:
-                    df_new = pd.DataFrame(self.kline_data)
+                candle = {
+                        "open": round(float(data.k.o), decimal),
+                        "close": round(float(data.k.c), decimal),
+                        "high": round(float(data.k.h), decimal),
+                        "low": round(float(data.k.l), decimal),
+                        "volume": round(float(data.k.v), decimal),
+                    }
+                
+                if self.trigger is None:    # first candle
+                    self.trigger = open_candle
+
+                    self.kline_data.append(candle)
+
+                    df_new = self.get_old_kline()
                     self.export_data = pd.concat([self.export_data, df_new], ignore_index=True)
                     self.export_data = indicators.ikh(self.export_data)
+
+                    print(self.export_data.tail(50))
+
+                if self.trigger != open_candle:     # new candle
+                    self.trigger = open_candle
+                    
+                    df_new = pd.DataFrame([self.kline_data[-1]])
+                    self.export_data = pd.concat([self.export_data, df_new], ignore_index=True)
+                    self.export_data = indicators.ikh(self.export_data)
+
+                    print(self.export_data.tail(50))
+
                     if len(self.export_data) >= self.df_size:
                         self.export_data = self.export_data.iloc[-self.df_size:].reset_index(drop=True)
                     self.kline_data.clear()
+                
+                else:
+                    self.kline_data.append(candle)
+
 
 
         connection = None
@@ -109,7 +130,43 @@ class KlineAnalysis:
         finally:
             if connection:
                 await connection.close_connection(close_session=True)
-    
+
+
+    def get_old_kline(self):
+        """
+        """
+        try:
+            from rest_api_market import klines
+            
+            old_klines = klines(
+                client=self.rest_client,
+                symbol=self.symbol,
+                interval=self.interval,
+                limit=90
+            )['data']
+
+            columns = [
+                'open_time', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_asset_volume', 'number_of_trades',
+                'taker_buy_base_volume', 'taker_buy_quote_volume', 'ignore'
+            ]
+            
+            df = pd.DataFrame(old_klines, columns=columns)
+
+            df = df.drop(columns=['open_time', 'close_time', 'quote_asset_volume', 
+                                  'number_of_trades', 'taker_buy_base_volume', 
+                                  'taker_buy_quote_volume', 'ignore'])
+
+            numeric_columns = ['open', 'high', 'low', 'close', 'volume']
+            for col in numeric_columns:
+                df[col] = pd.to_numeric(df[col])
+            
+            return df
+
+        except Exception as e:
+            print(f"Erro ao buscar candles: {e}")
+            return None
+
 
     async def gather_routines(self):
         '''
