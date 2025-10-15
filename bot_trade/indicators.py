@@ -224,6 +224,31 @@ def ikh(
     df['kumo_top'] = df[['senkou A', 'senkou B']].max(axis=1)
     df['kumo_bottom'] = df[['senkou A', 'senkou B']].min(axis=1)
     df = df.drop(columns=['FRAMA'])
+
+    '''# SIGNALS
+
+    'kumo trend'
+    kumo_trend = True if df['kumo_top'].iloc[-1] == df['senkou A'].iloc[-1] else False
+    
+    'kumo large'
+    df['kumo_cross'] = np.isclose(df['senkou A'], df['senkou B'], atol=10)
+    cross_idx  = df[df['kumo_cross']].index.tolist()
+    idx_kumo_neutral = cross_idx[-1] if len(cross_idx) > 0 else None
+    if idx_kumo_neutral is not None:
+        df['kumo_width'] = df['kumo_top'] - df['kumo_bottom']
+        recent_data = df.loc[idx_kumo_neutral:]
+        recent_mean_width = recent_data['kumo_width'].mean()
+        kumo_large = True if df['kumo_width'].iloc[-1] >= recent_mean_width else False
+    else:
+        kumo_large = False
+
+    'mean trend'
+
+    df['SIGNAL'] = np.where(
+        kumo_trend & kumo_large,
+        True,
+        False
+    )'''
     return df
 
 
