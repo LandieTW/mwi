@@ -80,11 +80,12 @@ Use on CMD
 
 
 import asyncio
-from rest_api.rest_api_config import client_rest
+from rest_api_config import client_rest
 # from websocket_api.websocket_api_config import client_ws_api
-from websocket_streams.websocket_streams_config import client_ws_streams
-from rest_api import error_handling, rest_api_classes
-from websocket_streams import websocket_streams_classes
+from websocket_streams_config import client_ws_streams
+import error_handling
+import rest_api_classes
+import websocket_streams_classes
 
 
 @error_handling.error_handler
@@ -99,6 +100,8 @@ def main():
     asyncio.run(analysis_kline.gather_routines())
     
     my_count = rest_api_classes.MyCount(client=client_rest)
+
+    print("HERE")
     
 
 if __name__ == "__main__":

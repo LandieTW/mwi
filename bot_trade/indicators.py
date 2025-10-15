@@ -212,18 +212,18 @@ def ikh(
     # kijun sen
     df['kijun'] = (df['high'].rolling(kijun_sen).max() +\
                     df['low'].rolling(kijun_sen).min()) / 2
+    # chikou span
+    df['chikou'] = df['close'].shift(-displacement)
     # senkou span a
     df['senkou A'] = ((df['tenkan'] + df['kijun']) / 2).shift(displacement)
     # senkou span b
     df['senkou B'] = ((df['high'].rolling(senkou_span_b).max() +\
                         df['low'].rolling(senkou_span_b).min()) / 2
                         ).shift(displacement)
-    # chikou span
-    df['chikou'] = df['close'].shift(-displacement)
     # kumo
     df['kumo_top'] = df[['senkou A', 'senkou B']].max(axis=1)
     df['kumo_bottom'] = df[['senkou A', 'senkou B']].min(axis=1)
-    df = df.drop(columns=['senkou A', 'senkou B', 'FRAMA'])
+    df = df.drop(columns=['FRAMA'])
     return df
 
 

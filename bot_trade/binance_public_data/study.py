@@ -32,7 +32,7 @@ def main():
 
     df = indicators.ikh(df)
 
-    df_plot = df.tail(500).reset_index()
+    df_plot = df.tail(100).reset_index()
 
     fig, axes = graph_plot(df_plot)
     plt.show()

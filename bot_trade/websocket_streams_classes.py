@@ -1,13 +1,16 @@
 
-
+import os
+import indicators
 import msvcrt
 import asyncio
 import logging
-from rest_api.functions import rest_api_market 
+import pandas as pd
+from collections import deque
 
 
 'N° decimal places'
 decimal = 2
+this_path = os.path.dirname(__file__)
 
 
 class KlineAnalysis:
@@ -15,13 +18,17 @@ class KlineAnalysis:
     Extract kline result
     '''
 
-
     def __init__(self, client):
         self.client = client
-        self.kline_data = {}
+        self.df_size = 100
+        self.export_data = pd.DataFrame()
+        self.buffer_size = 5
+        self.kline_data = deque(maxlen=self.buffer_size)
         self.shutdown_event = asyncio.Event()
-        self.graph_stats = {}
-
+        self.symbol = "BTCUSDT"
+        self.interval = '1m'
+        self.order = False      # If True, order will be sent to the exchange
+        
 
     async def shutdown(self):
         """
@@ -46,7 +53,9 @@ class KlineAnalysis:
                 Save retrieved kline data
             """
             if not self.shutdown_event.is_set():
-                self.kline_data = {
+
+                '''
+                candle = {
                         "Open time": int(data.k.t),
                         "Close time": int(data.k.T),
                         "Symbol": str(data.k.s),
@@ -65,12 +74,31 @@ class KlineAnalysis:
                         "Taker buy quote volume": round(float(data.k.Q), decimal),
                         "Ignore": str(data.k.B)
                 }
-                print(f"Klines:\n {self.kline_data}")
+                '''
+                
+                candle = {
+                    "open": round(float(data.k.o), decimal),
+                    "close": round(float(data.k.c), decimal),
+                    "high": round(float(data.k.h), decimal),
+                    "low": round(float(data.k.l), decimal),
+                    "volume": round(float(data.k.v), decimal),
+                }
+                self.kline_data.append(candle)
+                print(self.export_data.tail(50))
+
+                if len(self.kline_data) >= self.buffer_size:
+                    df_new = pd.DataFrame(self.kline_data)
+                    self.export_data = pd.concat([self.export_data, df_new], ignore_index=True)
+                    self.export_data = indicators.ikh(self.export_data)
+                    if len(self.export_data) >= self.df_size:
+                        self.export_data = self.export_data.iloc[-self.df_size:].reset_index(drop=True)
+                    self.kline_data.clear()
+
 
         connection = None
         try:
             connection = await self.client.websocket_streams.create_connection()
-            stream = await connection.kline(symbol="BTCUSDT", interval='1s')
+            stream = await connection.kline(symbol=self.symbol, interval=self.interval)
             stream.on("message", message_handler)
             
             await self.shutdown_event.wait()
@@ -83,39 +111,6 @@ class KlineAnalysis:
                 await connection.close_connection(close_session=True)
     
 
-    async def statistics(self):
-        """
-        Description:
-            Gets last 24h graph statistics
-        """
-        while not self.shutdown_event.is_set():
-            ticker = rest_api_market.ticker(
-                client=self.client,
-                symbol="BTCUSDT"
-            )['data'].actual_instance
-
-            self.graph_stats = {
-                "Symbol": str(ticker.symbol),
-                "Price_change": round(float(ticker.price_change), decimal),
-                "Price_change_percent": round(float(ticker.price_change_percent), decimal),
-                "Weighted_avg_price": round(float(ticker.weighted_avg_price), decimal),
-                "Open_price": round(float(ticker.open_price), decimal),
-                "High_price": round(float(ticker.high_price), decimal),
-                "Low_price": round(float(ticker.low_price), decimal),
-                "Last_price": round(float(ticker.last_price), decimal),
-                "Volume": round(float(ticker.volume), decimal),
-                "Quote_volume": round(float(ticker.quote_volume), decimal),
-                "Open_time": int(ticker.open_time),
-                "Close_time": int(ticker.close_time),
-                "First_id": int(ticker.first_id),
-                "Last_id": int(ticker.last_id),
-                "Count": int(ticker.count)
-            }
-
-            print(f"Ticker \n {self.graph_stats}")
-            await asyncio.sleep(5)
-
-
     async def gather_routines(self):
         '''
         Gather various tasks routines and execute it as in parallel proccess
@@ -123,6 +118,5 @@ class KlineAnalysis:
         await asyncio.gather(
             self.get_kline(),
             self.shutdown(),
-            self.statistics(),
             return_exceptions=True
         )
