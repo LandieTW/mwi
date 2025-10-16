@@ -212,18 +212,65 @@ def ikh(
     # kijun sen
     df['kijun'] = (df['high'].rolling(kijun_sen).max() +\
                     df['low'].rolling(kijun_sen).min()) / 2
+    # chikou span
+    df['chikou'] = df['close'].shift(-displacement)
     # senkou span a
     df['senkou A'] = ((df['tenkan'] + df['kijun']) / 2).shift(displacement)
     # senkou span b
     df['senkou B'] = ((df['high'].rolling(senkou_span_b).max() +\
                         df['low'].rolling(senkou_span_b).min()) / 2
                         ).shift(displacement)
-    # chikou span
-    df['chikou'] = df['close'].shift(-displacement)
     # kumo
     df['kumo_top'] = df[['senkou A', 'senkou B']].max(axis=1)
     df['kumo_bottom'] = df[['senkou A', 'senkou B']].min(axis=1)
-    df = df.drop(columns=['senkou A', 'senkou B', 'FRAMA'])
+    df = df.drop(columns=['FRAMA'])
+
+    # SIGNALS
+
+    # bandas abertas da nuvem indicam tendência forte
+    if not np.isclose(df['kumo_top'].iloc[-1], df['kumo_bottom'].iloc[-1], atol=10):
+        signal_1 = True
+        # banda superior da nuvem indica crescimento futuro
+        if df['kumo_top'].iloc[-1] == df['senkou A'].iloc[-1]:
+            trend_1 = "bullish"            
+        # banda inferior da nuvem indica queda futura
+        elif df['kumo_top'].iloc[-1] == df['senkou B'].iloc[-1]:
+            trend_1 = "bearish"
+    # bandas fechadas da nuvem indicam tendência fraca
+    else:
+        signal_1 = False
+        trend_1 = "sideways"
+
+    # médias móveis indicam tendência de alta
+    if df['tenkan'].iloc[-1] > df['kijun'].iloc[-1] and\
+        df['tenkan'].iloc[-1] > df['kumo_top'].iloc[-1] and\
+            df['kijun'].iloc[-1] > df['kumo_top'].iloc[-1]:
+        signal_2 = True
+        trend_2 = "bullish"
+    # médias móveis indicam tendência de baixa
+    elif df['tenkan'].iloc[-1] < df['kijun'].iloc[-1] and\
+        df['tenkan'].iloc[-1] < df['kumo_bottom'].iloc[-1] and\
+            df['kijun'].iloc[-1] < df['kumo_bottom'].iloc[-1]:
+        signal_2 = True
+        trend_2 = "bearish"
+    # médias móveis indicam tendência lateral
+    else:
+        signal_2 = False
+        trend_2 = "sideways"
+    
+    # chikou maior que o preço passado indica tendência de alta
+    if df['chikou'].iloc[-26] > df['close'].iloc[-26]:
+        signal_3 = True
+        trend_3 = "bullish"
+    # chikou menor que o preço passado indica tendência de baixa
+    elif df['chikou'].iloc[-26] < df['close'].iloc[-26]:
+        signal_3 = True
+        trend_3 = "bearish"
+    # chikou igual ao preço passado indica tendência lateral
+    else:
+        signal_3 = False
+        trend_3 = "sideways"
+
     return df
 
 

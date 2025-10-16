@@ -22,7 +22,7 @@ class KlineAnalysis:
         self.client = websocket_streams_client
         self.rest_client = rest_client
         self.trigger = None
-        self.df_size = 100
+        self.df_size = 150
         self.export_data = pd.DataFrame()
         self.buffer_size = 5
         self.kline_data = deque(maxlen=self.buffer_size)
@@ -30,6 +30,9 @@ class KlineAnalysis:
         self.symbol = "BTCUSDT"
         self.interval = '1m'
         self.order = False      # If True, order will be sent to the exchange
+        self.type_order = []
+        self.close_prices = []
+        self.earnings = .0
         
 
     async def shutdown(self):
@@ -90,22 +93,21 @@ class KlineAnalysis:
                 if self.trigger is None:    # first candle
                     self.trigger = open_candle
 
-                    self.kline_data.append(candle)
-
                     df_new = self.get_old_kline()
                     self.export_data = pd.concat([self.export_data, df_new], ignore_index=True)
                     self.export_data = indicators.ikh(self.export_data)
 
-                    print(self.export_data.tail(50))
+                    print(self.export_data.tail(5))
 
                 if self.trigger != open_candle:     # new candle
+                    
                     self.trigger = open_candle
                     
                     df_new = pd.DataFrame([self.kline_data[-1]])
                     self.export_data = pd.concat([self.export_data, df_new], ignore_index=True)
                     self.export_data = indicators.ikh(self.export_data)
 
-                    print(self.export_data.tail(50))
+                    print(self.export_data.tail(5))
 
                     if len(self.export_data) >= self.df_size:
                         self.export_data = self.export_data.iloc[-self.df_size:].reset_index(drop=True)
@@ -113,8 +115,6 @@ class KlineAnalysis:
                 
                 else:
                     self.kline_data.append(candle)
-
-
 
         connection = None
         try:
@@ -142,7 +142,7 @@ class KlineAnalysis:
                 client=self.rest_client,
                 symbol=self.symbol,
                 interval=self.interval,
-                limit=90
+                limit=145
             )['data']
 
             columns = [
