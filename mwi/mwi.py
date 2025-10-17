@@ -33,6 +33,7 @@ import glob
 import os
 import shutil
 import pandas as pd
+import numpy as np
 import time
 
 _this_path = os.path.dirname(os.path.abspath(__file__))
@@ -98,7 +99,16 @@ df = df.reset_index(
 
 df['GRAHAM'] = round((1.5 * df['VPA'] * 15 * df['LPA']) ** (1/2), 2)
 df['GRAHAM / PRECO'] = df['GRAHAM'] / df['PRECO']
-df = df[df['GRAHAM / PRECO'] > 1.1]
+df['OPORTUNIDADE'] = df['GRAHAM / PRECO'] > 1.1
 
-import pprint
-pprint.pprint(df)
+ref_price_idx = df[df['OPORTUNIDADE']]['PRECO'].idxmax()
+ref_price = df[ref_price_idx:ref_price_idx + 1]['PRECO'].values[0]
+
+df['QTDE'] = np.where(
+    df['OPORTUNIDADE'],
+    (ref_price / df['PRECO']).astype(int),
+    0
+)
+df['SHARE'] = round((df['QTDE'] * df['PRECO']) / (df['QTDE'] * df['PRECO']).sum(), 2) * 100
+
+print(df)
