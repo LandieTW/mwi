@@ -126,7 +126,7 @@ print(df)
 
 print("-"*200)
 print(f"And these are the best options to buy")
-print(f"Total investment: R%{total_investment}")
+print(f"Total investment: R$ {total_investment}")
 print("-"*200)
 
 print(df[df['OPORTUNIDADE']].reset_index(drop=True, inplace=False))
