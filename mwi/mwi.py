@@ -28,21 +28,19 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 download_csv = True  # Alterado para True para testar
 
-investment_amount = 1400.0
+investment_amount = 1000
 
 investments = {
-    "ITSA4": 305.5,
-    "POMO3": 222.4,
-    "CEBR6": 221.68,
-    "CEBR3": 204.64,
-    "ITSA3": 187.04,
-    "CMIG4": 177.76,
-    "POMO4": 176.4,
-    "VULC3": 159.68,
-    "CSUD3": 155.68,
-    "CAMB3": 145.76,
-    "LAVV3": 126.4,
-    "CMIG3": 112.48,
+    "EMAE4": 654.4,
+    "POMO3": 547.2,
+    "LAVV3": 494.72,
+    "POMO4": 473.46,
+    "CAMB3": 487.06,
+    "EALT4": 421.12,
+    "ITSA4": 602.68,
+    "ITSA3": 379.52,
+    "CSUD3": 315.2,
+    "VULC3": 325.44,
 }
 
 # ----------------------------------------------------------------
@@ -143,7 +141,6 @@ filter_conditions = (
 df = df[filter_conditions].reset_index(drop=True)
 
 # Criar novas colunas usando .copy() para evitar warnings
-df = df.copy()
 df['GRAHAM'] = round((1.5 * df['VPA'] * 15 * df['LPA']) ** (1/2), 2)
 df['GRAHAM / PRECO'] = df['GRAHAM'] / df['PRECO']
 df['OPORTUNIDADE'] = df['GRAHAM / PRECO'] > 1.15
@@ -151,24 +148,28 @@ df['OPORTUNIDADE'] = df['GRAHAM / PRECO'] > 1.15
 ref_price_idx = df[df['OPORTUNIDADE']]['PRECO'].idxmax()
 ref_price = df.loc[ref_price_idx, 'PRECO']
 
-df['QTDE'] = np.where(
-    df['OPORTUNIDADE'],
-    (ref_price / df['PRECO']).astype(int),
+new_df = df.copy()
+
+new_df['QTDE'] = np.where(
+    new_df['OPORTUNIDADE'],
+    (ref_price / new_df['PRECO']).astype(int),
     0
 )
-df['SHARE'] = round((df['QTDE'] * df['PRECO']) / (df['QTDE'] * df['PRECO']).sum(), 2) * 100
-df['VALUE'] = df['PRECO'] * df['QTDE']
-total_investment = round(df['VALUE'].sum(), 2)
+new_df['SHARE'] = round((new_df['QTDE'] * new_df['PRECO']) / (new_df['QTDE'] * new_df['PRECO']).sum(), 2) * 100
+new_df['VALUE'] = new_df['PRECO'] * new_df['QTDE']
+total_investment = round(new_df['VALUE'].sum(), 2)
 
 print("-"*200)
 print(f"This script selected the tickers below as good investments")
 print(f"And these are the best options to buy")
 print("-"*200)
-df = df[df['OPORTUNIDADE']].reset_index(drop=True)
-print(df)
+new_df = new_df[new_df['OPORTUNIDADE']].reset_index(drop=True)
+print(new_df)
 
 for ticker in investments.keys():
-    if ticker not in df['TICKER'].values:
+    '''if ticker not in new_df['TICKER'].values and\
+        ticker not in df['TICKER'].values:'''
+    if ticker not in new_df['TICKER'].values:
         print("-"*200)
         print("ATTENTION")
         print(f"\nYOU SHOULD SELL ALL YOUR SHARES OF {ticker}!")
@@ -176,7 +177,7 @@ for ticker in investments.keys():
         investment_amount += investments[ticker]
 
 # Criar uma cópia explícita para evitar warnings
-df_work = df.copy()
+df_work = new_df.copy()
 df_work['INVEST PRESENT'] = df_work['TICKER'].map(investments)
 df_work['QTD PRESENT'] = (df_work['INVEST PRESENT'] / df_work['PRECO']).fillna(0).astype(int)
 
